@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Metahaeven</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: black;
+      height: 100%;
+      width: 100%;
+      font-family: 'Courier New', monospace;
+      cursor: none;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+    }
+
+    .center-image {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      max-width: 300px;
+      transition: transform 0.1s ease-out, filter 0.3s ease;
+      pointer-events: none;
+      /* kein filter mehr */
+    }
+
+    .center-image.hovered {
+      filter: contrast(150%) saturate(150%) hue-rotate(10deg);
+      transform: translate(-50%, -50%) scale(1.02);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <img id="logo" class="center-image" src="https://i.ibb.co/Rpt5jWb8/metahaeven-w.png" alt="Metahaeven Logo" />
+
+  <script>
+    const canvas = document.getElementById("bg");
+    const ctx = canvas.getContext("2d");
+    const logo = document.getElementById("logo");
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    const mouse = { x: width / 2, y: height / 2 };
+    window.addEventListener("mousemove", e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+
+      // 🌀 Parallax-Effekt fürs Bild
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const dx = (e.clientX - centerX) / centerX;
+      const dy = (e.clientY - centerY) / centerY;
+      logo.style.transform = `translate(-50%, -50%) translate(${dx * 10}px, ${dy * 10}px)`;
+    });
+
+    // Hover-Verzerrung
+    document.addEventListener("mousemove", (e) => {
+      const rect = logo.getBoundingClientRect();
+      const withinImage =
+        e.clientX > rect.left &&
+        e.clientX < rect.right &&
+        e.clientY > rect.top &&
+        e.clientY < rect.bottom;
+
+      logo.classList.toggle("hovered", withinImage);
+    });
+
+    window.addEventListener("resize", () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const letters = "METAHEVN".split("");
+    const fragments = [];
+
+    function createFragment() {
+      return {
+        char: letters[Math.floor(Math.random() * letters.length)],
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: 12 + Math.random() * 16,
+        opacity: 0.05 + Math.random() * 0.2,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        life: 100 + Math.random() * 200
+      };
+    }
+
+    for (let i = 0; i < 100; i++) {
+      fragments.push(createFragment());
+    }
+
+    const gridSize = 60;
+
+    function drawGrid() {
+      ctx.lineWidth = 1;
+
+      for (let x = 0; x < width; x += gridSize) {
+        for (let y = 0; y < height; y += gridSize) {
+
+          // 🧲 Bild als "Anziehungspunkt"
+          const dx = (mouse.x - x);
+          const dy = (mouse.y - y);
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const strength = Math.min(1, 300 / dist);
+
+          const offsetX = dx * 0.015 * strength;
+          const offsetY = dy * 0.015 * strength;
+
+          const opacity = 0.03 + 0.12 * strength;
+          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity.toFixed(3)})`;
+
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + gridSize + offsetX, y + offsetY);
+          ctx.lineTo(x + gridSize + offsetX, y + gridSize + offsetY);
+          ctx.lineTo(x + offsetX, y + gridSize + offsetY);
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+    }
+
+    function drawFragments() {
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+
+      for (let f of fragments) {
+        ctx.font = `${f.size}px Courier New`;
+        ctx.fillStyle = `rgba(255,255,255,${f.opacity})`;
+        ctx.fillText(f.char, f.x, f.y);
+
+        f.x += f.vx;
+        f.y += f.vy;
+        f.life--;
+
+        if (f.life <= 0 || f.x < 0 || f.x > width || f.y < 0 || f.y > height) {
+          Object.assign(f, createFragment());
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      drawGrid();
+      drawFragments();
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
