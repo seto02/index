@@ -29,15 +29,17 @@
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 2;
-      width: 200px; /* Logo-Größe angepasst */
+      max-width: 80vw;
+      max-height: 50vh;
     }
 
     .center-image {
-      width: 100%;
+      width: 60%; /* Logo kleiner */
       height: auto;
       transition: transform 0.1s ease-out, filter 0.3s ease;
       pointer-events: auto;
-      transform: translate(0, 0); /* Fix für Initialposition */
+      display: block;
+      margin: 0 auto;
     }
 
     .center-image.hovered {
@@ -45,8 +47,12 @@
     }
 
     @media (max-width: 768px) {
-      a.center-link {
-        width: 150px;
+      .center-link {
+        max-width: 90vw;
+        max-height: 40vh;
+      }
+      .center-image {
+        width: 80%; /* etwas größer auf kleinen Bildschirmen */
       }
     }
   </style>
@@ -66,16 +72,29 @@
     let height = canvas.height = window.innerHeight;
 
     const mouse = { x: width / 2, y: height / 2 };
+
+    function updateLogoPosition(x, y) {
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const dx = (x - centerX) / centerX;
+      const dy = (y - centerY) / centerY;
+      logo.style.transform = `translate(-50%, -50%) translate(${dx * 10}px, ${dy * 10}px)`;
+    }
+
     window.addEventListener("mousemove", e => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
-
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const dx = (e.clientX - centerX) / centerX;
-      const dy = (e.clientY - centerY) / centerY;
-      logo.style.transform = `translate(${dx * 10}px, ${dy * 10}px)`;
+      updateLogoPosition(e.clientX, e.clientY);
     });
+
+    window.addEventListener("touchmove", e => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        mouse.x = touch.clientX;
+        mouse.y = touch.clientY;
+        updateLogoPosition(touch.clientX, touch.clientY);
+      }
+    }, { passive: true });
 
     document.addEventListener("mousemove", (e) => {
       const rect = logo.getBoundingClientRect();
@@ -172,4 +191,3 @@
   </script>
 </body>
 </html>
-
