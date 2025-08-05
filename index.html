@@ -1,71 +1,69 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Metahaeven</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: black;
-      height: 100%;
-      width: 100%;
-      font-family: 'Courier New', monospace;
-      overflow: hidden;
-      cursor: default;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<title>Metahaeven</title>
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    height: 100%; width: 100%;
+    background: black;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    cursor: default;
+  }
 
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: block;
-    }
+  canvas {
+    position: absolute;
+    top: 0; left: 0;
+    display: block;
+  }
 
+  a.center-link {
+    position: fixed; /* fixed für bessere mobile Zentrierung */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    max-width: 80vw;
+    max-height: 50vh;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  img.center-image {
+    width: 60vw;
+    max-width: 280px;
+    height: auto;
+    transition: transform 0.15s ease-out, filter 0.3s ease;
+    pointer-events: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+    /* Nur Skalierung beim Hover, keine Überschreibung von translate */
+  }
+
+  img.center-image.hovered {
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 8px rgba(57, 255, 20, 0.9)) contrast(150%) saturate(150%);
+  }
+
+  @media (max-width: 768px) {
     a.center-link {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
-      max-width: 80vw;
-      max-height: 50vh;
-      user-select: none;
-      -webkit-user-drag: none;
+      max-width: 90vw;
+      max-height: 40vh;
     }
-
-    .center-image {
-      width: 60vw;
-      max-width: 300px;
-      height: auto;
-      transition: transform 0.15s ease-out, filter 0.3s ease;
-      pointer-events: auto;
-      user-select: none;
-      -webkit-user-drag: none;
-      /* Kein transform hier, damit JS transform nicht überschreibt */
+    img.center-image {
+      width: 80vw;
+      max-width: none;
+      /* Wichtig: keine transform im CSS außer scale */
     }
-
-    .center-image.hovered {
-      transform: scale(1.02);
-      filter: drop-shadow(0 0 8px rgba(57, 255, 20, 0.9)) contrast(150%) saturate(150%);
-    }
-
-    @media (max-width: 768px) {
-      a.center-link {
-        max-width: 90vw;
-        max-height: 40vh;
-      }
-      .center-image {
-        width: 80vw;
-        max-width: none;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
   <canvas id="bg"></canvas>
-  <a href="https://instagram.com/metahaeven" class="center-link" target="_blank" rel="noopener noreferrer">
+  <a href="https://instagram.com/metahaeven" class="center-link" target="_blank" rel="noopener noreferrer" aria-label="Metahaeven Instagram">
     <img id="logo" class="center-image" src="https://iili.io/FPVXvkJ.png" alt="Metahaeven Logo" />
   </a>
 
@@ -73,6 +71,7 @@
     const canvas = document.getElementById("bg");
     const ctx = canvas.getContext("2d");
     const logo = document.getElementById("logo");
+    const link = document.querySelector('a.center-link');
 
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
@@ -80,23 +79,37 @@
     // Mouse und Touchposition initial in der Mitte
     const mouse = { x: width / 2, y: height / 2 };
 
-    // Funktion: Logo-Position anhand von Maus-/Touchposition aktualisieren
-    function updateLogoPosition(x, y) {
+    // Funktion: Offset basierend auf Maus/Touch, maximal +/-10px
+    function updateLogoOffset(x, y) {
       const centerX = width / 2;
       const centerY = height / 2;
-      const dx = (x - centerX) / centerX;
-      const dy = (y - centerY) / centerY;
-      // Wichtig: Basis-Zentrierung translate(-50%, -50%) bleibt, zusätzlich kleine Verschiebung
-      logo.style.transform = `translate(-50%, -50%) translate(${dx * 10}px, ${dy * 10}px)`;
+      const dx = (x - centerX) / centerX; // -1 bis 1
+      const dy = (y - centerY) / centerY; // -1 bis 1
+
+      // Maximal 10px Verschiebung
+      const offsetX = dx * 10;
+      const offsetY = dy * 10;
+
+      // Wichtig: Basis-Transform in CSS: translate(-50%, -50%)
+      // Wir ergänzen hier nur den Offset, ohne Basis-Translate zu verändern.
+      // Dafür nutzen wir "style.transform" mit "translate(-50%, -50%) translate(offsetX, offsetY)"
+      // und berücksichtigen ggf. scale bei Hover.
+
+      // Hole aktuellen scale-Wert falls hover aktiv (damit nicht überschrieben wird)
+      const isHovered = logo.classList.contains('hovered');
+      const scale = isHovered ? 1.02 : 1;
+
+      // Setze transform mit scale und offset
+      link.style.transform = `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
     }
 
     // Mousemove Event
     window.addEventListener("mousemove", e => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
-      updateLogoPosition(mouse.x, mouse.y);
+      updateLogoOffset(mouse.x, mouse.y);
 
-      // Hover Effekt am Logo selbst
+      // Hover Effekt am Logo selbst (nur um class toggeln)
       const rect = logo.getBoundingClientRect();
       const withinImage =
         e.clientX > rect.left &&
@@ -104,7 +117,11 @@
         e.clientY > rect.top &&
         e.clientY < rect.bottom;
 
-      logo.classList.toggle("hovered", withinImage);
+      if (withinImage) {
+        logo.classList.add('hovered');
+      } else {
+        logo.classList.remove('hovered');
+      }
     });
 
     // Touchmove für Mobile
@@ -113,19 +130,23 @@
         const touch = e.touches[0];
         mouse.x = touch.clientX;
         mouse.y = touch.clientY;
-        updateLogoPosition(mouse.x, mouse.y);
+        updateLogoOffset(mouse.x, mouse.y);
       }
     }, { passive: true });
 
-    // Fenstergröße anpassen
+    // Resize Event
     window.addEventListener("resize", () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
-      // Logo neu zentrieren beim Resize (Maus evt. in Mitte)
-      updateLogoPosition(mouse.x, mouse.y);
+      // Nach Resize neu zentrieren, Maus evtl. noch in Mitte?
+      updateLogoOffset(mouse.x, mouse.y);
     });
 
-    // Buchstaben für Typografie-Fragmente
+    // Init Logo Position zentriert (ohne Offset)
+    updateLogoOffset(width / 2, height / 2);
+
+    // --- Canvas Hintergrund Animation ---
+
     const letters = "metahaeven".toUpperCase().split("");
     const fragments = [];
 
@@ -150,7 +171,6 @@
 
     function drawGrid() {
       ctx.lineWidth = 1;
-
       for (let x = 0; x < width; x += gridSize) {
         for (let y = 0; y < height; y += gridSize) {
           const dx = (mouse.x - x);
@@ -203,8 +223,6 @@
 
     animate();
 
-    // Initiale Logo-Position (Mitte)
-    updateLogoPosition(width / 2, height / 2);
   </script>
 </body>
 </html>
