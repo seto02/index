@@ -6,21 +6,18 @@
   <title>Metahaeven</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       background: black;
       height: 100%;
       width: 100%;
       font-family: 'Courier New', monospace;
       overflow: hidden;
       cursor: default;
-      -webkit-tap-highlight-color: transparent; /* Kein Highlight auf iOS */
+      -webkit-tap-highlight-color: transparent;
     }
 
     canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
+      position: absolute; top: 0; left: 0;
       display: block;
     }
 
@@ -32,16 +29,18 @@
       z-index: 2;
       max-width: 80vw;
       max-height: 50vh;
-      touch-action: none; /* Damit Touch-Move sauber geht */
+      touch-action: none;
     }
 
     .center-image {
-      width: 60vw; /* kleiner */
+      width: 60vw;
       max-width: 300px;
       height: auto;
       transition: transform 0.1s ease-out, filter 0.3s ease;
       pointer-events: auto;
       user-select: none;
+      /* Wichtig: Anfangstransform nur translate(-50%, -50%) via a.center-link */
+      /* Hier keine translate mehr! */
     }
 
     .center-image.hovered {
@@ -49,7 +48,7 @@
     }
 
     @media (max-width: 768px) {
-      .center-link {
+      a.center-link {
         max-width: 90vw;
         max-height: 40vh;
       }
@@ -70,18 +69,18 @@
     const canvas = document.getElementById("bg");
     const ctx = canvas.getContext("2d");
     const logo = document.getElementById("logo");
+    const link = document.querySelector("a.center-link");
 
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
 
     const mouse = { x: width / 2, y: height / 2 };
-    let lastTouch = null;
 
-    // Farbwerte fürs sanfte Pulsieren
+    // Neon-Grün Basisfarbe
     const neonBase = { r: 57, g: 255, b: 20 };
     let neonPulsePhase = 0;
 
-    // Für Partikel, die Cursor/Finger folgen
+    // Partikel, die dem Cursor folgen
     const followParticles = [];
     const maxFollowParticles = 50;
 
@@ -120,16 +119,18 @@
       }
     }
 
-    // Logo Position & Bewegung
+    // LOGO BEWEGUNG: nur innerer translate (kein translate(-50%, -50%)!)
     function updateLogoPosition(x, y) {
       const centerX = width / 2;
       const centerY = height / 2;
       const dx = (x - centerX) / centerX;
       const dy = (y - centerY) / centerY;
-      // Leichte Bewegung max 10px
-      logo.style.transform = `translate(-50%, -50%) translate(${dx * 10}px, ${dy * 10}px)`;
+      // Bewegungsbereich ±10px
+      // Hier nur translate, nicht scale/rotate
+      logo.style.transform = `translate(${dx * 10}px, ${dy * 10}px)`;
     }
 
+    // Maus
     window.addEventListener("mousemove", e => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
@@ -145,7 +146,7 @@
         e.clientY < rect.bottom;
       logo.classList.toggle("hovered", withinImage);
 
-      // Follow Partikel
+      // Partikel folgen
       if (followParticles.length < maxFollowParticles) {
         followParticles.push(createFollowParticle(e.clientX, e.clientY));
       }
@@ -160,7 +161,6 @@
 
         updateLogoPosition(t.clientX, t.clientY);
 
-        // Follow Partikel
         if (followParticles.length < maxFollowParticles) {
           followParticles.push(createFollowParticle(t.clientX, t.clientY));
         }
@@ -251,7 +251,6 @@
     }
 
     function animate() {
-      // Sanfter Farbwechsel (Pulsieren)
       neonPulsePhase += 0.02;
       const pulse = 0.7 + 0.3 * Math.sin(neonPulsePhase);
       const neonColor = {
@@ -263,8 +262,6 @@
       ctx.clearRect(0, 0, width, height);
       drawGrid(neonColor);
       drawFragments(neonColor);
-
-      // Partikel folgen Cursor
       updateFollowParticles();
       drawFollowParticles();
 
