@@ -2,177 +2,169 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Metahaeven</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Minimalistische Galerie mit Animationen</title>
   <style>
-    html, body {
+    /* Reset & Basics */
+    * {
+      box-sizing: border-box;
+    }
+    body {
       margin: 0;
-      padding: 0;
-      background: black;
-      height: 100%;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #fff;
+      color: #111;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      padding: 2rem;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.8rem;
+      letter-spacing: 0.05em;
+    }
+    main {
+      flex-grow: 1;
+      padding: 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    /* Galerie Grid */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+      gap: 1rem;
+    }
+    .gallery img {
       width: 100%;
-      font-family: 'Courier New', monospace;
-      overflow: hidden;
-      cursor: default;
-    }
-
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: block;
-    }
-
-    a.center-link {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
-      max-width: 80vw;
-      max-height: 50vh;
-    }
-
-    .center-image {
-      width: 60%;
       height: auto;
-      pointer-events: auto;
-      transform-origin: center center;
-      /* KEINE transition, KEINE filter, KEINE hover styles */
+      object-fit: cover;
+      cursor: pointer;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-
-    @media (max-width: 768px) {
-      a.center-link {
-        max-width: 90vw;
-        max-height: 40vh;
-      }
-      .center-image {
-        width: 80%;
-      }
+    .gallery img:hover {
+      transform: scale(1.07) rotate(1deg);
+      box-shadow: 0 6px 20px rgb(0 0 0 / 0.25);
+    }
+    /* Lightbox Hintergrund */
+    .lightbox {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 1000;
+    }
+    .lightbox.visible {
+      visibility: visible;
+      opacity: 1;
+    }
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 6px;
+      box-shadow: 0 0 40px rgba(255,255,255,0.4);
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .lightbox.visible img {
+      opacity: 1;
+      transform: scale(1);
+    }
+    /* Close Button */
+    .close-btn {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      font-size: 2.4rem;
+      color: #fff;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 700;
+      background: rgba(0,0,0,0.4);
+      padding: 0.2rem 0.7rem;
+      border-radius: 4px;
+      line-height: 1;
+      transition: background 0.3s ease;
+      z-index: 1100;
+    }
+    .close-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    /* Footer */
+    footer {
+      padding: 1rem 0;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #777;
     }
   </style>
 </head>
 <body>
-  <canvas id="bg"></canvas>
-  <a href="https://instagram.com/metahaeven" class="center-link" target="_blank">
-    <img id="logo" class="center-image" src="https://iili.io/FPVXvkJ.png" alt="Metahaeven Logo" />
-  </a>
+  <header>Minimalistische Galerie mit Animationen</header>
+  <main>
+    <div class="gallery">
+      <img src="https://picsum.photos/id/1015/400/300" alt="Bild 1" />
+      <img src="https://picsum.photos/id/1025/400/300" alt="Bild 2" />
+      <img src="https://picsum.photos/id/1035/400/300" alt="Bild 3" />
+      <img src="https://picsum.photos/id/1045/400/300" alt="Bild 4" />
+      <img src="https://picsum.photos/id/1055/400/300" alt="Bild 5" />
+      <img src="https://picsum.photos/id/1065/400/300" alt="Bild 6" />
+    </div>
+  </main>
+
+  <div class="lightbox" id="lightbox">
+    <span class="close-btn" id="closeBtn">&times;</span>
+    <img src="" alt="Großes Bild" id="lightboxImg" />
+  </div>
+
+  <footer>© 2025 Minimalistische Galerie</footer>
 
   <script>
-    const canvas = document.getElementById("bg");
-    const ctx = canvas.getContext("2d");
-    const logo = document.getElementById("logo");
+    const gallery = document.querySelector('.gallery');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const closeBtn = document.getElementById('closeBtn');
 
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
-
-    const mouse = { x: width / 2, y: height / 2 };
-    window.addEventListener("mousemove", e => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const dx = (e.clientX - centerX) / centerX;
-      const dy = (e.clientY - centerY) / centerY;
-      logo.style.transform = `translate(-50%, -50%) translate(${dx * 10}px, ${dy * 10}px)`;
+    gallery.addEventListener('click', (e) => {
+      if (e.target.tagName === 'IMG') {
+        lightboxImg.style.opacity = 0; // Start animiert unsichtbar
+        lightbox.classList.add('visible');
+        // Klein Delay damit die opacity transition greift
+        setTimeout(() => {
+          lightboxImg.src = e.target.src.replace(/400\/300/, '900/600');
+        }, 50);
+      }
     });
 
-    window.addEventListener("touchmove", e => {
-      if (e.touches.length > 0) {
-        const touch = e.touches[0];
-        mouse.x = touch.clientX;
-        mouse.y = touch.clientY;
-
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const dx = (touch.clientX - centerX) / centerX;
-        const dy = (touch.clientY - centerY) / centerY;
-        logo.style.transform = `translate(-50%, -50%) translate(${dx * 10}px, ${dy * 10}px)`;
-      }
-    }, { passive: true });
-
-    window.addEventListener("resize", () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+    lightboxImg.addEventListener('load', () => {
+      lightboxImg.style.opacity = 1; // Bild sanft einblenden
     });
 
-    const letters = "metahvn".split("");
-    const fragments = [];
-
-    function createFragment() {
-      return {
-        char: letters[Math.floor(Math.random() * letters.length)],
-        x: Math.random() * width,
-        y: Math.random() * height,
-        size: 8 + Math.random() * 10,
-        opacity: 0.05 + Math.random() * 0.2,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        life: 100 + Math.random() * 200
-      };
+    function closeLightbox() {
+      lightboxImg.style.opacity = 0; // Bild ausblenden
+      setTimeout(() => {
+        lightbox.classList.remove('visible');
+        lightboxImg.src = '';
+      }, 400); // Zeit für die Animation abwarten
     }
 
-    for (let i = 0; i < 160; i++) {
-      fragments.push(createFragment());
-    }
+    closeBtn.addEventListener('click', closeLightbox);
 
-    const gridSize = 60;
-
-    function drawGrid() {
-      ctx.lineWidth = 1;
-
-      for (let x = 0; x < width; x += gridSize) {
-        for (let y = 0; y < height; y += gridSize) {
-          const dx = (mouse.x - x);
-          const dy = (mouse.y - y);
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const strength = Math.min(1, 300 / dist);
-
-          const offsetX = dx * 0.015 * strength;
-          const offsetY = dy * 0.015 * strength;
-
-          const opacity = 0.03 + 0.12 * strength;
-          ctx.strokeStyle = `rgba(57, 255, 20, ${opacity.toFixed(3)})`;
-
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x + gridSize + offsetX, y + offsetY);
-          ctx.lineTo(x + gridSize + offsetX, y + gridSize + offsetY);
-          ctx.lineTo(x + offsetX, y + gridSize + offsetY);
-          ctx.closePath();
-          ctx.stroke();
-        }
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        closeLightbox();
       }
-    }
-
-    function drawFragments() {
-      ctx.textBaseline = "middle";
-      ctx.textAlign = "center";
-
-      for (let f of fragments) {
-        ctx.font = `${f.size}px Courier New`;
-        ctx.fillStyle = `rgba(57, 255, 20, ${f.opacity})`;
-        ctx.fillText(f.char, f.x, f.y);
-
-        f.x += f.vx;
-        f.y += f.vy;
-        f.life--;
-
-        if (f.life <= 0 || f.x < 0 || f.x > width || f.y < 0 || f.y > height) {
-          Object.assign(f, createFragment());
-        }
-      }
-    }
-
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
-      drawGrid();
-      drawFragments();
-      requestAnimationFrame(animate);
-    }
-
-    animate();
+    });
   </script>
 </body>
 </html>
