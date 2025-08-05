@@ -29,8 +29,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 2;
-      max-width: 80vw;
-      max-height: 50vh;
+      width: 200px; /* Logo-Größe angepasst */
     }
 
     .center-image {
@@ -38,6 +37,7 @@
       height: auto;
       transition: transform 0.1s ease-out, filter 0.3s ease;
       pointer-events: auto;
+      transform: translate(0, 0); /* Fix für Initialposition */
     }
 
     .center-image.hovered {
@@ -45,9 +45,8 @@
     }
 
     @media (max-width: 768px) {
-      .center-link {
-        max-width: 90vw;
-        max-height: 40vh;
+      a.center-link {
+        width: 150px;
       }
     }
   </style>
@@ -75,7 +74,7 @@
       const centerY = height / 2;
       const dx = (e.clientX - centerX) / centerX;
       const dy = (e.clientY - centerY) / centerY;
-      logo.style.transform = `translate(-50%, -50%) translate(${dx * 10}px, ${dy * 10}px)`;
+      logo.style.transform = `translate(${dx * 10}px, ${dy * 10}px)`;
     });
 
     document.addEventListener("mousemove", (e) => {
@@ -173,3 +172,4 @@
   </script>
 </body>
 </html>
+
