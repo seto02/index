@@ -2,18 +2,18 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Metahaeven</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden;
       background: black;
       height: 100%;
       width: 100%;
       font-family: 'Courier New', monospace;
-      cursor: none;
+      overflow: hidden;
+      cursor: default;
     }
 
     canvas {
@@ -23,27 +23,40 @@
       display: block;
     }
 
-    .center-image {
+    a.center-link {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 2;
-      max-width: 300px;
+      max-width: 80vw;
+      max-height: 50vh;
+    }
+
+    .center-image {
+      width: 100%;
+      height: auto;
       transition: transform 0.1s ease-out, filter 0.3s ease;
-      pointer-events: none;
-      /* kein filter mehr */
+      pointer-events: auto;
     }
 
     .center-image.hovered {
-      filter: contrast(150%) saturate(150%) hue-rotate(10deg);
-      transform: translate(-50%, -50%) scale(1.02);
+      transform: scale(1.02);
+    }
+
+    @media (max-width: 768px) {
+      .center-link {
+        max-width: 90vw;
+        max-height: 40vh;
+      }
     }
   </style>
 </head>
 <body>
   <canvas id="bg"></canvas>
-  <img id="logo" class="center-image" src="https://i.ibb.co/Rpt5jWb8/metahaeven-w.png" alt="Metahaeven Logo" />
+  <a href="https://instagram.com/metahaeven" class="center-link" target="_blank">
+    <img id="logo" class="center-image" src="https://iili.io/FPVXvkJ.png" alt="Metahaeven Logo" />
+  </a>
 
   <script>
     const canvas = document.getElementById("bg");
@@ -58,7 +71,6 @@
       mouse.x = e.clientX;
       mouse.y = e.clientY;
 
-      // 🌀 Parallax-Effekt fürs Bild
       const centerX = width / 2;
       const centerY = height / 2;
       const dx = (e.clientX - centerX) / centerX;
@@ -66,7 +78,6 @@
       logo.style.transform = `translate(-50%, -50%) translate(${dx * 10}px, ${dy * 10}px)`;
     });
 
-    // Hover-Verzerrung
     document.addEventListener("mousemove", (e) => {
       const rect = logo.getBoundingClientRect();
       const withinImage =
@@ -83,7 +94,7 @@
       height = canvas.height = window.innerHeight;
     });
 
-    const letters = "METAHEVN".split("");
+    const letters = "metahvn".split("");
     const fragments = [];
 
     function createFragment() {
@@ -110,8 +121,6 @@
 
       for (let x = 0; x < width; x += gridSize) {
         for (let y = 0; y < height; y += gridSize) {
-
-          // 🧲 Bild als "Anziehungspunkt"
           const dx = (mouse.x - x);
           const dy = (mouse.y - y);
           const dist = Math.sqrt(dx * dx + dy * dy);
@@ -121,7 +130,7 @@
           const offsetY = dy * 0.015 * strength;
 
           const opacity = 0.03 + 0.12 * strength;
-          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity.toFixed(3)})`;
+          ctx.strokeStyle = `rgba(57, 255, 20, ${opacity.toFixed(3)})`;
 
           ctx.beginPath();
           ctx.moveTo(x, y);
@@ -140,7 +149,7 @@
 
       for (let f of fragments) {
         ctx.font = `${f.size}px Courier New`;
-        ctx.fillStyle = `rgba(255,255,255,${f.opacity})`;
+        ctx.fillStyle = `rgba(57, 255, 20, ${f.opacity})`;
         ctx.fillText(f.char, f.x, f.y);
 
         f.x += f.vx;
@@ -157,7 +166,6 @@
       ctx.clearRect(0, 0, width, height);
       drawGrid();
       drawFragments();
-
       requestAnimationFrame(animate);
     }
 
