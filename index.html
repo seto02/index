@@ -34,16 +34,11 @@
     }
 
     .center-image {
-      width: 60%;  /* kleiner dargestellt */
+      width: 60%;
       height: auto;
       pointer-events: auto;
       transform-origin: center center;
-      /* transition entfernt */
-    }
-
-    .center-image.hovered {
-      /* Kein transform scale mehr, sonst springt es leicht */
-      filter: drop-shadow(0 0 8px #39ff14) contrast(150%) saturate(150%);
+      /* KEINE transition, KEINE filter, KEINE hover styles */
     }
 
     @media (max-width: 768px) {
@@ -52,7 +47,7 @@
         max-height: 40vh;
       }
       .center-image {
-        width: 80%; /* fürs Handy etwas größer */
+        width: 80%;
       }
     }
   </style>
@@ -83,7 +78,6 @@
       logo.style.transform = `translate(-50%, -50%) translate(${dx * 10}px, ${dy * 10}px)`;
     });
 
-    // Touch für mobile Geräte
     window.addEventListener("touchmove", e => {
       if (e.touches.length > 0) {
         const touch = e.touches[0];
@@ -98,17 +92,6 @@
       }
     }, { passive: true });
 
-    document.addEventListener("mousemove", (e) => {
-      const rect = logo.getBoundingClientRect();
-      const withinImage =
-        e.clientX > rect.left &&
-        e.clientX < rect.right &&
-        e.clientY > rect.top &&
-        e.clientY < rect.bottom;
-
-      logo.classList.toggle("hovered", withinImage);
-    });
-
     window.addEventListener("resize", () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
@@ -122,7 +105,7 @@
         char: letters[Math.floor(Math.random() * letters.length)],
         x: Math.random() * width,
         y: Math.random() * height,
-        size: 8 + Math.random() * 10, // etwas kleiner
+        size: 8 + Math.random() * 10,
         opacity: 0.05 + Math.random() * 0.2,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
@@ -130,7 +113,7 @@
       };
     }
 
-    for (let i = 0; i < 160; i++) { // mehr Buchstaben
+    for (let i = 0; i < 160; i++) {
       fragments.push(createFragment());
     }
 
