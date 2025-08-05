@@ -34,20 +34,25 @@
     }
 
     .center-image {
-      width: 100%;
+      width: 60%;  /* kleiner dargestellt */
       height: auto;
-      transition: transform 0.1s ease-out, filter 0.3s ease;
       pointer-events: auto;
+      transform-origin: center center;
+      /* transition entfernt */
     }
 
     .center-image.hovered {
-      transform: scale(1.02);
+      /* Kein transform scale mehr, sonst springt es leicht */
+      filter: drop-shadow(0 0 8px #39ff14) contrast(150%) saturate(150%);
     }
 
     @media (max-width: 768px) {
-      .center-link {
+      a.center-link {
         max-width: 90vw;
         max-height: 40vh;
+      }
+      .center-image {
+        width: 80%; /* fürs Handy etwas größer */
       }
     }
   </style>
@@ -67,29 +72,31 @@
     let height = canvas.height = window.innerHeight;
 
     const mouse = { x: width / 2, y: height / 2 };
-
-    // Mausbewegung & Touch-Move - Logo Parallax
-    function updateLogoPosition(x, y) {
-      mouse.x = x;
-      mouse.y = y;
+    window.addEventListener("mousemove", e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
 
       const centerX = width / 2;
       const centerY = height / 2;
-      const dx = (x - centerX) / centerX;
-      const dy = (y - centerY) / centerY;
+      const dx = (e.clientX - centerX) / centerX;
+      const dy = (e.clientY - centerY) / centerY;
       logo.style.transform = `translate(-50%, -50%) translate(${dx * 10}px, ${dy * 10}px)`;
-    }
-
-    window.addEventListener("mousemove", e => {
-      updateLogoPosition(e.clientX, e.clientY);
     });
 
+    // Touch für mobile Geräte
     window.addEventListener("touchmove", e => {
-      if(e.touches.length > 0) {
+      if (e.touches.length > 0) {
         const touch = e.touches[0];
-        updateLogoPosition(touch.clientX, touch.clientY);
+        mouse.x = touch.clientX;
+        mouse.y = touch.clientY;
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const dx = (touch.clientX - centerX) / centerX;
+        const dy = (touch.clientY - centerY) / centerY;
+        logo.style.transform = `translate(-50%, -50%) translate(${dx * 10}px, ${dy * 10}px)`;
       }
-    }, {passive:true});
+    }, { passive: true });
 
     document.addEventListener("mousemove", (e) => {
       const rect = logo.getBoundingClientRect();
@@ -107,30 +114,23 @@
       height = canvas.height = window.innerHeight;
     });
 
-    // Buchstaben für Hintergrund
     const letters = "metahvn".split("");
     const fragments = [];
-
-    // Anzahl der Buchstaben (Partikel) im Hintergrund
-    const NUM_FRAGMENTS = 200;
 
     function createFragment() {
       return {
         char: letters[Math.floor(Math.random() * letters.length)],
         x: Math.random() * width,
         y: Math.random() * height,
-        // Schriftgröße zwischen 8 und 16 px (kleiner skaliert)
-        size: 8 + Math.random() * 8,
+        size: 8 + Math.random() * 10, // etwas kleiner
         opacity: 0.05 + Math.random() * 0.2,
-        // Geschwindigkeit (kann angepasst werden)
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
         life: 100 + Math.random() * 200
       };
     }
 
-    // Fragmente initial erstellen
-    for (let i = 0; i < NUM_FRAGMENTS; i++) {
+    for (let i = 0; i < 160; i++) { // mehr Buchstaben
       fragments.push(createFragment());
     }
 
