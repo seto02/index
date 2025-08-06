@@ -1,181 +1,146 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Minimalistische Galerie - Yzavoku Style</title>
-<style>
-  /* Grundlegendes Reset */
-  * {
-    margin: 0; padding: 0; box-sizing: border-box;
-  }
-  html, body {
-    height: 100%;
-    background: #fff;
-    color: #111;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-weight: 300;
-    font-size: 14px;
-    line-height: 1.4;
-  }
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 40px 20px;
-    min-height: 100vh;
-  }
-
-  /* Galerie Container */
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    /* flexible Reihenhöhe mit Zeilen automatisch verteilt */
-    grid-auto-rows: 180px;
-    gap: 15px;
-    max-width: 1000px;
-    width: 100%;
-  }
-
-  /* Bilder dynamisch in Grid */
-  .gallery-item {
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.05);
-    transition:
-      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-      box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Unterschiedliche Bildhöhen mit grid-row-end */
-  .gallery-item--tall {
-    grid-row-end: span 2;
-  }
-
-  /* Bild selbst */
-  .gallery-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Hover Effekt */
-  .gallery-item:hover {
-    transform: scale(1.04);
-    box-shadow: 0 8px 20px rgb(0 0 0 / 0.1);
-    z-index: 10;
-  }
-  .gallery-item:hover img {
-    transform: scale(1.1);
-  }
-
-  /* Lightbox Hintergrund */
-  .lightbox {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(255 255 255 / 0.95);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.35s ease;
-    z-index: 1000;
-    backdrop-filter: blur(15px);
-  }
-  .lightbox.visible {
-    visibility: visible;
-    opacity: 1;
-  }
-
-  /* Lightbox Bild */
-  .lightbox img {
-    max-width: 90vw;
-    max-height: 80vh;
-    box-shadow: 0 0 30px rgb(0 0 0 / 0.2);
-    border-radius: 6px;
-    filter: drop-shadow(0 0 3px rgba(0,0,0,0.1));
-    transition: transform 0.4s ease;
-  }
-
-  /* Close Button */
-  .close-btn {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    font-size: 30px;
-    font-weight: 100;
-    color: #222;
-    cursor: pointer;
-    user-select: none;
-    z-index: 1010;
-    transition: color 0.3s ease;
-  }
-  .close-btn:hover {
-    color: #000;
-  }
-
-  @media (max-width: 600px) {
-    .gallery {
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      grid-auto-rows: 130px;
-      gap: 10px;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>seto02</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      height: 100%;
+      width: 100%;
+      font-family: 'IBM Plex Mono', monospace;
+      overflow: hidden;
+      cursor: default;
+      color: white;
     }
-  }
-</style>
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+    }
+
+    .center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      font-size: 3rem;
+      font-weight: 300;
+    }
+  </style>
 </head>
 <body>
+  <canvas id="bg"></canvas>
+  <div class="center-text">seto</div>
 
-<div class="gallery">
-  <div class="gallery-item gallery-item--tall"><img src="https://picsum.photos/id/1011/600/900" alt="Bild 1"></div>
-  <div class="gallery-item"><img src="https://picsum.photos/id/1015/600/400" alt="Bild 2"></div>
-  <div class="gallery-item"><img src="https://picsum.photos/id/1021/600/400" alt="Bild 3"></div>
-  <div class="gallery-item gallery-item--tall"><img src="https://picsum.photos/id/1025/600/900" alt="Bild 4"></div>
-  <div class="gallery-item"><img src="https://picsum.photos/id/1035/600/400" alt="Bild 5"></div>
-  <div class="gallery-item"><img src="https://picsum.photos/id/1039/600/400" alt="Bild 6"></div>
-</div>
+  <script>
+    const canvas = document.getElementById("bg");
+    const ctx = canvas.getContext("2d");
 
-<div class="lightbox" id="lightbox">
-  <span class="close-btn" id="closeBtn">&times;</span>
-  <img src="" alt="Großes Bild" id="lightboxImg" />
-</div>
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
 
-<script>
-  const galleryItems = document.querySelectorAll('.gallery-item img');
-  const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightboxImg');
-  const closeBtn = document.getElementById('closeBtn');
-
-  galleryItems.forEach(img => {
-    img.addEventListener('click', () => {
-      lightboxImg.src = img.src.replace(/\/\d+x\d+\//, '/900x1350/');
-      lightbox.classList.add('visible');
-      document.body.style.overflow = 'hidden'; // Scrollen verhindern
+    const mouse = { x: width / 2, y: height / 2 };
+    window.addEventListener("mousemove", e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
     });
-  });
 
-  function closeLightbox() {
-    lightbox.classList.remove('visible');
-    lightboxImg.src = '';
-    document.body.style.overflow = ''; // Scrollen wieder erlauben
-  }
+    window.addEventListener("touchmove", e => {
+      if (e.touches.length > 0) {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+      }
+    }, { passive: true });
 
-  closeBtn.addEventListener('click', closeLightbox);
-  lightbox.addEventListener('click', (e) => {
-    if (e.target === lightbox) closeLightbox();
-  });
+    window.addEventListener("resize", () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
 
-  // Escape-Taste schließt Lightbox
-  window.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && lightbox.classList.contains('visible')) {
-      closeLightbox();
+    const letters = ["0", "2"];
+    const fragments = [];
+
+    function createFragment() {
+      return {
+        char: letters[Math.floor(Math.random() * letters.length)],
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: 12 + Math.random() * 16,
+        opacity: 0.05 + Math.random() * 0.2,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        life: 100 + Math.random() * 200
+      };
     }
-  });
-</script>
 
+    for (let i = 0; i < 100; i++) {
+      fragments.push(createFragment());
+    }
+
+    const gridSize = 60;
+
+    function drawGrid() {
+      ctx.lineWidth = 1;
+
+      for (let x = 0; x < width; x += gridSize) {
+        for (let y = 0; y < height; y += gridSize) {
+          const dx = (mouse.x - x);
+          const dy = (mouse.y - y);
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const strength = Math.min(1, 300 / dist);
+
+          const offsetX = dx * 0.015 * strength;
+          const offsetY = dy * 0.015 * strength;
+
+          const opacity = 0.03 + 0.12 * strength;
+          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity.toFixed(3)})`;
+
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + gridSize + offsetX, y + offsetY);
+          ctx.lineTo(x + gridSize + offsetX, y + gridSize + offsetY);
+          ctx.lineTo(x + offsetX, y + gridSize + offsetY);
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+    }
+
+    function drawFragments() {
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+
+      for (let f of fragments) {
+        ctx.font = `${f.size}px 'IBM Plex Mono'`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${f.opacity})`;
+        ctx.fillText(f.char, f.x, f.y);
+
+        f.x += f.vx;
+        f.y += f.vy;
+        f.life--;
+
+        if (f.life <= 0 || f.x < 0 || f.x > width || f.y < 0 || f.y > height) {
+          Object.assign(f, createFragment());
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      drawGrid();
+      drawFragments();
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
 </body>
 </html>
