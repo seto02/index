@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>seto02</title>
+  <title>Seto</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300&display=swap" rel="stylesheet">
   <style>
     html, body {
@@ -25,20 +25,44 @@
       display: block;
     }
 
-    .center-text {
+    .center-container {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 2;
-      font-size: 1rem;
+      text-align: center;
+    }
+
+    .center-container h1 {
+      font-size: 1.5rem;
       font-weight: 300;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .center-container .links {
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .center-container .links a {
+      color: white;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
   <canvas id="bg"></canvas>
-  <div class="center-text">seto</div>
+  <div class="center-container">
+    <h1>seto</h1>
+    <div class="links">
+      <a href="#" target="_blank">instagram</a>
+      <a href="#" target="_blank">steam</a>
+      <a href="#" target="_blank">letterboxd</a>
+    </div>
+  </div>
 
   <script>
     const canvas = document.getElementById("bg");
@@ -73,7 +97,7 @@
         char: letters[Math.floor(Math.random() * letters.length)],
         x: Math.random() * width,
         y: Math.random() * height,
-        size: 12 + Math.random() * 16,
+        size: 8 + Math.random() * 10,
         opacity: 0.05 + Math.random() * 0.2,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
@@ -81,11 +105,11 @@
       };
     }
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 300; i++) {
       fragments.push(createFragment());
     }
 
-    const gridSize = 60;
+    const gridSize = 30;
 
     function drawGrid() {
       ctx.lineWidth = 1;
