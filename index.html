@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Seto</title>
+  <title>seto02</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300&display=swap" rel="stylesheet">
   <style>
     html, body {
@@ -38,6 +38,7 @@
       font-size: 1.2rem;
       font-weight: 300;
       margin: 0 0 0.5rem 0;
+      min-height: 1.2em;
     }
 
     .center-container .links {
@@ -166,10 +167,8 @@
 
     animate();
 
-    // Typewriter Effekt für "seto02"
+    // Typewriter Effekt mit "in loving memory of" alle 30 Sekunden
     const title = document.getElementById("title");
-    const options = ["seto02", "002220", "202002", "220020", "000222", "220022"];
-    let currentIndex = 0;
 
     function typeWriterEffect(text, callback) {
       let i = 0;
@@ -179,18 +178,15 @@
         i++;
         if (i >= text.length) {
           clearInterval(interval);
-          setTimeout(callback, 3000); // Pause bevor gelöscht wird
+          setTimeout(callback, 3000);
         }
       }, 100);
     }
 
     function deleteEffect(callback) {
-      const text = title.textContent;
-      let i = text.length;
       const interval = setInterval(() => {
-        title.textContent = text.substring(0, i - 1);
-        i--;
-        if (i <= 0) {
+        title.textContent = title.textContent.slice(0, -1);
+        if (title.textContent.length === 0) {
           clearInterval(interval);
           callback();
         }
@@ -198,11 +194,18 @@
     }
 
     function cycleText() {
-      typeWriterEffect(options[currentIndex], () => {
-        deleteEffect(() => {
-          currentIndex = (currentIndex + 1) % options.length;
-          cycleText();
-        });
+      typeWriterEffect("seto02", () => {
+        setTimeout(() => {
+          deleteEffect(() => {
+            typeWriterEffect("in loving memory of", () => {
+              setTimeout(() => {
+                deleteEffect(() => {
+                  cycleText();
+                });
+              }, 5000);
+            });
+          });
+        }, 30000);
       });
     }
 
