@@ -56,7 +56,7 @@
 <body>
   <canvas id="bg"></canvas>
   <div class="center-container">
-    <h1 id="title">seto02</h1>
+    <h1 id="title"></h1>
     <div class="links">
       <a href="https://www.instagram.com/seto02" target="_blank">instagram</a>
       <a href="https://steamcommunity.com/id/seto02/" target="_blank">steam</a>
@@ -166,24 +166,47 @@
 
     animate();
 
-    // Glitch Effekt für "seto02"
-    function randomSixDigits() {
-      const options = ["0", "2"];
-      let result = "";
-      for (let i = 0; i < 6; i++) {
-        result += options[Math.floor(Math.random() * options.length)];
-      }
-      return result;
+    // Typewriter Effekt für "seto02"
+    const title = document.getElementById("title");
+    const options = ["seto02", "002220", "202002", "220020", "000222", "220022"];
+    let currentIndex = 0;
+
+    function typeWriterEffect(text, callback) {
+      let i = 0;
+      title.textContent = "";
+      const interval = setInterval(() => {
+        title.textContent += text.charAt(i);
+        i++;
+        if (i >= text.length) {
+          clearInterval(interval);
+          setTimeout(callback, 3000); // Pause bevor gelöscht wird
+        }
+      }, 100);
     }
 
-    const title = document.getElementById("title");
-    setInterval(() => {
-      const original = "seto02";
-      title.textContent = randomSixDigits();
-      setTimeout(() => {
-        title.textContent = original;
-      }, 400); // Glitch-Dauer
-    }, 7000); // Alle 7 Sekunden
+    function deleteEffect(callback) {
+      const text = title.textContent;
+      let i = text.length;
+      const interval = setInterval(() => {
+        title.textContent = text.substring(0, i - 1);
+        i--;
+        if (i <= 0) {
+          clearInterval(interval);
+          callback();
+        }
+      }, 50);
+    }
+
+    function cycleText() {
+      typeWriterEffect(options[currentIndex], () => {
+        deleteEffect(() => {
+          currentIndex = (currentIndex + 1) % options.length;
+          cycleText();
+        });
+      });
+    }
+
+    cycleText();
   </script>
 </body>
 </html>
